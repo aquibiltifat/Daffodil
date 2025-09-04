@@ -25,15 +25,19 @@
     }
   </style>
 </head>
-<body class="h-screen w-screen flex bg-gray-100 text-black dark:bg-gray-900 dark:text-white transition-colors duration-300">
+<body class="h-screen w-screen flex bg-gray-100 text-black dark:bg-gray-900 dark:text-white transition-colors duration-300 overflow-hidden">
 
   <!-- Sidebar -->
-  <aside class="w-1/4 p-4 flex flex-col justify-between border-r border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-black transition-colors duration-300">
+  <aside id="sidebar" 
+    class="fixed md:static top-0 left-0 h-full w-3/4 md:w-1/4 p-4 flex flex-col justify-between 
+           border-r border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-black 
+           transition-transform transform -translate-x-full md:translate-x-0 z-50">
     
     <!-- Top Section -->
     <div>
       <!-- New Chat -->
-      <button onclick="newChat()" class="w-full py-2 rounded-lg mb-4 font-semibold bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 transition">
+      <button onclick="newChat()" 
+        class="w-full py-2 rounded-lg mb-4 font-semibold bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 transition">
         + New Chat
       </button>
 
@@ -51,31 +55,27 @@
       </div>
     </div>
 
-    <!-- Bottom Section: Dark/Light Mode Toggle -->
+    <!-- Bottom Section -->
     <div class="flex justify-start mt-4">
       <button onclick="toggleTheme()" id="theme-btn"
         class="relative w-14 h-14 rounded-full flex items-center justify-center bg-gray-300 dark:bg-gray-800 shadow-lg transition-all duration-500 overflow-hidden group">
-        
-        <!-- Sun Icon -->
         <span id="sun-icon" class="absolute text-yellow-500 text-2xl transition-transform duration-500 transform">☀️</span>
-        <!-- Moon Icon -->
         <span id="moon-icon" class="absolute text-blue-400 text-2xl transition-transform duration-500 transform translate-y-full">🌙</span>
-
-        <!-- Glow -->
         <div class="absolute inset-0 rounded-full blur-md opacity-40 bg-gradient-to-r from-blue-500 to-purple-500 animate-pulse"></div>
       </button>
     </div>
   </aside>
 
   <!-- Chat Section -->
-  <main class="flex-1 flex flex-col bg-white dark:bg-gray-800 transition-colors duration-300">
+  <main class="flex-1 flex flex-col bg-white dark:bg-gray-800 transition-colors duration-300 h-full">
 
     <!-- Chat Header -->
-    <!-- Chat Header -->
-  <div class="p-4 border-b border-gray-300 dark:border-gray-700 text-center bg-gray-100 dark:bg-gray-900">
-  <h1 class="text-2xl font-bold text-black dark:text-white tracking-wide"> Daffodils.ai </h1>
-  </div>
-
+    <div class="p-4 border-b border-gray-300 dark:border-gray-700 flex items-center justify-between bg-gray-100 dark:bg-gray-900">
+  <!-- Mobile Sidebar Toggle -->
+  <button onclick="toggleSidebar()" class="md:hidden text-black dark:text-white text-2xl">☰</button>
+  <!-- Title -->
+  <h1 class="text-2xl font-bold text-black dark:text-white tracking-wide text-center flex-1">Daffodils.ai </h1>
+    </div>
 
     <!-- Chat Box -->
     <div id="chat-box" class="flex-1 p-6 overflow-y-auto">
@@ -85,8 +85,8 @@
       </div>
     </div>
 
-    <!-- Input Area -->
-    <div class="p-4 border-t border-gray-300 dark:border-gray-700 flex items-center space-x-2">
+    <!-- Input Area (Sticky Bottom) -->
+    <div class="p-4 border-t border-gray-300 dark:border-gray-700 flex items-center space-x-2 sticky bottom-0 bg-white dark:bg-gray-800 z-10">
       
       <!-- Hidden File Input -->
       <input type="file" id="image-input" accept="image/*" class="hidden" onchange="sendImage(this)">
@@ -122,7 +122,13 @@
   </main>
 
   <script>
-    const API_KEY = "YOUR_GEMINI_API_KEY"; // Replace with Gemini API key
+    const API_KEY = "AIzaSyCoE4psjYwGvQ4Vgl6Yk93J3iBGvvQdILk"; // Replace with Gemini API key
+
+    // --- Sidebar Toggle (Mobile) ---
+    function toggleSidebar() {
+      let sidebar = document.getElementById("sidebar");
+      sidebar.classList.toggle("-translate-x-full");
+    }
 
     // --- Dark/Light Theme Toggle ---
     function toggleTheme() {
