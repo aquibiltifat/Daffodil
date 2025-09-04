@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daffodils.ai</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' }
+  </script>
+
+  <!-- Marked.js -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Highlight.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+
+  <style>
+    #theme-btn:hover,
+    #send-btn:hover,
+    #img-btn:hover {
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.6),
+                  0 0 40px rgba(0, 255, 200, 0.4);
+    }
+  </style>
+</head>
+<body class="h-screen w-screen flex bg-gray-100 text-black dark:bg-gray-900 dark:text-white transition-colors duration-300">
+
+  <!-- Sidebar -->
+  <aside class="w-1/4 p-4 flex flex-col justify-between border-r border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-black transition-colors duration-300">
+    
+    <!-- Top Section -->
+    <div>
+      <!-- New Chat -->
+      <button onclick="newChat()" class="w-full py-2 rounded-lg mb-4 font-semibold bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 transition">
+        + New Chat
+      </button>
+
+      <!-- Search Chats -->
+      <input type="text" id="search-input" placeholder="🔍 Search chats..."
+        class="w-full mb-4 px-3 py-2 rounded-lg bg-gray-100 text-black dark:bg-gray-800 dark:text-white border border-gray-300 dark:border-gray-700 focus:outline-none transition" 
+        onkeyup="searchChats()">
+
+      <!-- History -->
+      <div class="flex-1 overflow-y-auto">
+        <h2 class="text-lg font-bold mb-2">📜 Daffodils.ai History</h2>
+        <ul id="history-list" class="text-sm space-y-2">
+          <!-- Dynamic history will appear here -->
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bottom Section: Dark/Light Mode Toggle -->
+    <div class="flex justify-start mt-4">
+      <button onclick="toggleTheme()" id="theme-btn"
+        class="relative w-14 h-14 rounded-full flex items-center justify-center bg-gray-300 dark:bg-gray-800 shadow-lg transition-all duration-500 overflow-hidden group">
+        
+        <!-- Sun Icon -->
+        <span id="sun-icon" class="absolute text-yellow-500 text-2xl transition-transform duration-500 transform">☀️</span>
+        <!-- Moon Icon -->
+        <span id="moon-icon" class="absolute text-blue-400 text-2xl transition-transform duration-500 transform translate-y-full">🌙</span>
+
+        <!-- Glow -->
+        <div class="absolute inset-0 rounded-full blur-md opacity-40 bg-gradient-to-r from-blue-500 to-purple-500 animate-pulse"></div>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Chat Section -->
+  <main class="flex-1 flex flex-col bg-white dark:bg-gray-800 transition-colors duration-300">
+
+    <!-- Chat Header -->
+    <!-- Chat Header -->
+  <div class="p-4 border-b border-gray-300 dark:border-gray-700 text-center bg-gray-100 dark:bg-gray-900">
+  <h1 class="text-2xl font-bold text-black dark:text-white tracking-wide"> Daffodils.ai </h1>
+  </div>
+
+
+    <!-- Chat Box -->
+    <div id="chat-box" class="flex-1 p-6 overflow-y-auto">
+      <!-- Default Welcome -->
+      <div id="default-message" class="h-full flex items-center justify-center">
+        <h1 class="text-xl opacity-70">How can I help you today?</h1>
+      </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="p-4 border-t border-gray-300 dark:border-gray-700 flex items-center space-x-2">
+      
+      <!-- Hidden File Input -->
+      <input type="file" id="image-input" accept="image/*" class="hidden" onchange="sendImage(this)">
+
+      <!-- Futuristic Image Upload Button -->
+      <button onclick="document.getElementById('image-input').click()" id="img-btn"
+        class="p-3 rounded-full bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 
+               flex items-center justify-center transition-colors duration-300 relative">
+        <div class="absolute inset-0 rounded-full blur-md opacity-40 
+                    bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-400 animate-pulse"></div>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" 
+             stroke="currentColor" stroke-width="2" 
+             class="w-6 h-6 text-cyan-400 drop-shadow-lg relative z-10">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 7h2l1-2h12l1 2h2v12H3V7z" />
+          <circle cx="12" cy="13" r="4" />
+        </svg>
+      </button>
+
+      <!-- Text Input -->
+      <input id="user-input" type="text" 
+        class="flex-1 p-3 rounded-lg bg-gray-200 text-black dark:bg-gray-700 dark:text-white focus:outline-none transition-colors duration-300" 
+        placeholder="Ask anything ?" />
+
+      <!-- Arrow button -->
+      <button onclick="sendMessage()" id="send-btn"
+        class="p-3 rounded-full bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 flex items-center justify-center transition-colors duration-300 relative">
+        <div class="absolute inset-0 rounded-full blur-md opacity-40 bg-gradient-to-r from-cyan-400 to-purple-500 animate-pulse"></div>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6 relative z-10">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3 21l9-3 9-9-9 3-3 9-3-9z" />
+        </svg>
+      </button>
+    </div>
+  </main>
+
+  <script>
+    const API_KEY = "YOUR_GEMINI_API_KEY"; // Replace with Gemini API key
+
+    // --- Dark/Light Theme Toggle ---
+    function toggleTheme() {
+      let html = document.documentElement;
+      let sun = document.getElementById("sun-icon");
+      let moon = document.getElementById("moon-icon");
+
+      if (html.classList.contains("dark")) {
+        html.classList.remove("dark");
+        sun.style.transform = "translateY(0)";
+        moon.style.transform = "translateY(100%)";
+        localStorage.setItem("theme", "light");
+      } else {
+        html.classList.add("dark");
+        sun.style.transform = "translateY(-100%)";
+        moon.style.transform = "translateY(0)";
+        localStorage.setItem("theme", "dark");
+      }
+    }
+
+    // Load saved theme
+    (function () {
+      let savedTheme = localStorage.getItem("theme");
+      let sun = document.getElementById("sun-icon");
+      let moon = document.getElementById("moon-icon");
+
+      if (savedTheme === "dark") {
+        document.documentElement.classList.add("dark");
+        sun.style.transform = "translateY(-100%)";
+        moon.style.transform = "translateY(0)";
+      } else {
+        document.documentElement.classList.remove("dark");
+        sun.style.transform = "translateY(0)";
+        moon.style.transform = "translateY(100%)";
+      }
+    })();
+
+    // --- Chat Functions ---
+    function newChat() {
+      let chatBox = document.getElementById("chat-box");
+      chatBox.innerHTML = `<div id="default-message" class="h-full flex items-center justify-center">
+        <h1 class="text-xl opacity-70">How can I help you today?</h1>
+      </div>`;
+    }
+
+    function addToHistory(message) {
+      let historyList = document.getElementById("history-list");
+      let preview = message.length > 25 ? message.substring(0, 25) + "..." : message;
+
+      let li = document.createElement("li");
+      li.textContent = preview;
+      li.classList.add("cursor-pointer", "hover:text-green-500", "history-item");
+      li.setAttribute("data-full", message);
+      li.onclick = () => loadFromHistory(message);
+      historyList.prepend(li);
+    }
+
+    function loadFromHistory(message) {
+      alert("History clicked: " + message);
+    }
+
+    function searchChats() {
+      let input = document.getElementById("search-input").value.toLowerCase();
+      let items = document.querySelectorAll("#history-list .history-item");
+
+      items.forEach(item => {
+        let text = item.getAttribute("data-full").toLowerCase();
+        item.style.display = text.includes(input) ? "" : "none";
+      });
+    }
+
+    // --- Send Image ---
+    async function sendImage(inputEl) {
+      let file = inputEl.files[0];
+      if (!file) return;
+
+      let reader = new FileReader();
+      reader.onload = async function (e) {
+        let imageUrl = e.target.result;
+
+        let chatBox = document.getElementById("chat-box");
+        let defaultMsg = document.getElementById("default-message");
+        if (defaultMsg) defaultMsg.remove();
+
+        // Show user uploaded image
+        let userMsg = document.createElement("div");
+        userMsg.classList.add("mb-4", "text-right");
+        userMsg.innerHTML = `<span class="inline-block max-w-xs">
+          <img src="${imageUrl}" class="rounded-lg shadow-lg border-2 border-cyan-400"/>
+        </span>`;
+        chatBox.appendChild(userMsg);
+
+        addToHistory("[Image Uploaded]");
+
+        // Bot typing
+        let botMsg = document.createElement("div");
+        botMsg.classList.add("mb-4", "text-left");
+        botMsg.innerHTML = `<span class="bg-black text-green-400 px-4 py-2 rounded-lg inline-block max-w-xl">Analyzing image...</span>`;
+        chatBox.appendChild(botMsg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        try {
+          let response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: "Describe this image" }, { inline_data: { mime_type: file.type, data: imageUrl.split(",")[1] } }] }]
+              })
+            }
+          );
+
+          let data = await response.json();
+          if (data.candidates && data.candidates.length > 0) {
+            let rawText = data.candidates[0].content.parts[0].text;
+            let html = marked.parse(rawText);
+
+            botMsg.innerHTML = `<div class="bg-gray-200 dark:bg-black text-black dark:text-green-400 px-4 py-2 rounded-lg inline-block max-w-xl prose dark:prose-invert">
+              <strong>Daffodils.ai:</strong><br>${html}
+            </div>`;
+          } else {
+            botMsg.innerHTML = `<span class="bg-black text-red-400 px-4 py-2 rounded-lg inline-block max-w-xl">Sorry, I couldn't analyze the image.</span>`;
+          }
+        } catch (error) {
+          botMsg.innerHTML = `<span class="bg-black text-red-400 px-4 py-2 rounded-lg inline-block max-w-xl">Error: Something went wrong.</span>`;
+        }
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // --- Send Text Message ---
+    async function sendMessage() {
+      let input = document.getElementById("user-input").value.trim();
+      if (input === "") return;
+
+      let chatBox = document.getElementById("chat-box");
+      let defaultMsg = document.getElementById("default-message");
+      if (defaultMsg) defaultMsg.remove();
+
+      // User message
+      let userMsg = document.createElement("div");
+      userMsg.classList.add("mb-4", "text-right");
+      userMsg.innerHTML = `<span class="bg-blue-600 text-white px-4 py-2 rounded-lg inline-block max-w-xl">${input}</span>`;
+      chatBox.appendChild(userMsg);
+
+      addToHistory(input);
+      document.getElementById("user-input").value = "";
+
+      // Bot typing
+      let botMsg = document.createElement("div");
+      botMsg.classList.add("mb-4", "text-left");
+      botMsg.innerHTML = `<span class="bg-black text-green-400 px-4 py-2 rounded-lg inline-block max-w-xl">typing...</span>`;
+      chatBox.appendChild(botMsg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      try {
+        let response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contents: [{ parts: [{ text: input }] }] })
+          }
+        );
+
+        let data = await response.json();
+        if (data.candidates && data.candidates.length > 0) {
+          let rawText = data.candidates[0].content.parts[0].text;
+          let html = marked.parse(rawText);
+
+          botMsg.innerHTML = `<div class="bg-gray-200 dark:bg-black text-black dark:text-green-400 px-4 py-2 rounded-lg inline-block max-w-xl prose dark:prose-invert">
+            <strong>Daffodils.ai:</strong><br>${html}
+          </div>`;
+          botMsg.querySelectorAll("pre code").forEach(el => hljs.highlightElement(el));
+        } else {
+          botMsg.innerHTML = `<span class="bg-black text-red-400 px-4 py-2 rounded-lg inline-block max-w-xl">Sorry, I couldn't understand.</span>`;
+        }
+      } catch (error) {
+        botMsg.innerHTML = `<span class="bg-black text-red-400 px-4 py-2 rounded-lg inline-block max-w-xl">Error: Something went wrong.</span>`;
+      }
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    document.getElementById("user-input").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>
