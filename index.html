@@ -15,29 +15,25 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
   <script>hljs.highlightAll();</script>
-
-  <style>
-    #theme-btn:hover,
-    #send-btn:hover,
-    #img-btn:hover {
-      box-shadow: 0 0 20px rgba(0, 255, 255, 0.6),
-                  0 0 40px rgba(0, 255, 200, 0.4);
-    }
-  </style>
 </head>
 <body class="h-screen w-screen flex bg-gray-100 text-black dark:bg-gray-900 dark:text-white transition-colors duration-300 overflow-hidden">
 
+  <!-- Overlay (for mobile sidebar) -->
+  <div id="overlay" 
+       class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"
+       onclick="toggleSidebar()"></div>
+
   <!-- Sidebar -->
   <aside id="sidebar" 
-    class="fixed md:static top-0 left-0 h-full w-3/4 md:w-1/4 p-4 flex flex-col justify-between 
-           border-r border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-black 
-           transition-transform transform -translate-x-full md:translate-x-0 z-50">
-    
+      class="fixed md:static top-0 left-0 h-full w-3/4 md:w-1/4 p-4 flex flex-col justify-between 
+             border-r border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-black 
+             transform -translate-x-full md:translate-x-0 z-50
+             transition-transform duration-300 ease-in-out">
+
     <!-- Top Section -->
     <div>
       <!-- New Chat -->
-      <button onclick="newChat()" 
-        class="w-full py-2 rounded-lg mb-4 font-semibold bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 transition">
+      <button onclick="newChat()" class="w-full py-2 rounded-lg mb-4 font-semibold bg-gray-300 hover:bg-gray-400 dark:bg-gray-700 dark:hover:bg-gray-600 transition">
         + New Chat
       </button>
 
@@ -55,26 +51,35 @@
       </div>
     </div>
 
-    <!-- Bottom Section -->
+    <!-- Bottom Section: Dark/Light Mode Toggle -->
     <div class="flex justify-start mt-4">
       <button onclick="toggleTheme()" id="theme-btn"
         class="relative w-14 h-14 rounded-full flex items-center justify-center bg-gray-300 dark:bg-gray-800 shadow-lg transition-all duration-500 overflow-hidden group">
+        
+        <!-- Sun Icon -->
         <span id="sun-icon" class="absolute text-yellow-500 text-2xl transition-transform duration-500 transform">☀️</span>
+        <!-- Moon Icon -->
         <span id="moon-icon" class="absolute text-blue-400 text-2xl transition-transform duration-500 transform translate-y-full">🌙</span>
+
+        <!-- Glow -->
         <div class="absolute inset-0 rounded-full blur-md opacity-40 bg-gradient-to-r from-blue-500 to-purple-500 animate-pulse"></div>
       </button>
     </div>
   </aside>
 
   <!-- Chat Section -->
-  <main class="flex-1 flex flex-col bg-white dark:bg-gray-800 transition-colors duration-300 h-full">
+  <main class="flex-1 flex flex-col bg-white dark:bg-gray-800 transition-colors duration-300">
 
     <!-- Chat Header -->
     <div class="p-4 border-b border-gray-300 dark:border-gray-700 flex items-center justify-between bg-gray-100 dark:bg-gray-900">
-  <!-- Mobile Sidebar Toggle -->
-  <button onclick="toggleSidebar()" class="md:hidden text-black dark:text-white text-2xl">☰</button>
-  <!-- Title -->
-  <h1 class="text-2xl font-bold text-black dark:text-white tracking-wide text-center flex-1">Daffodils.ai </h1>
+      <!-- Mobile Menu Button -->
+      <button class="md:hidden text-2xl" onclick="toggleSidebar()">☰</button>
+      
+      <!-- Centered Title -->
+      <h1 class="text-2xl font-bold text-white tracking-wide text-center flex-1"> Daffodils.ai </h1>
+      
+      <!-- Spacer for symmetry -->
+      <div class="w-8 md:hidden"></div>
     </div>
 
     <!-- Chat Box -->
@@ -124,13 +129,21 @@
   <script>
     const API_KEY = "AIzaSyCoE4psjYwGvQ4Vgl6Yk93J3iBGvvQdILk"; // Replace with Gemini API key
 
-    // --- Sidebar Toggle (Mobile) ---
+    // Sidebar Toggle
     function toggleSidebar() {
       let sidebar = document.getElementById("sidebar");
-      sidebar.classList.toggle("-translate-x-full");
+      let overlay = document.getElementById("overlay");
+
+      if (sidebar.classList.contains("-translate-x-full")) {
+        sidebar.classList.remove("-translate-x-full");
+        overlay.classList.remove("hidden");
+      } else {
+        sidebar.classList.add("-translate-x-full");
+        overlay.classList.add("hidden");
+      }
     }
 
-    // --- Dark/Light Theme Toggle ---
+    // Theme Toggle
     function toggleTheme() {
       let html = document.documentElement;
       let sun = document.getElementById("sun-icon");
@@ -166,7 +179,7 @@
       }
     })();
 
-    // --- Chat Functions ---
+    // Chat Functions
     function newChat() {
       let chatBox = document.getElementById("chat-box");
       chatBox.innerHTML = `<div id="default-message" class="h-full flex items-center justify-center">
@@ -200,69 +213,7 @@
       });
     }
 
-    // --- Send Image ---
-    async function sendImage(inputEl) {
-      let file = inputEl.files[0];
-      if (!file) return;
-
-      let reader = new FileReader();
-      reader.onload = async function (e) {
-        let imageUrl = e.target.result;
-
-        let chatBox = document.getElementById("chat-box");
-        let defaultMsg = document.getElementById("default-message");
-        if (defaultMsg) defaultMsg.remove();
-
-        // Show user uploaded image
-        let userMsg = document.createElement("div");
-        userMsg.classList.add("mb-4", "text-right");
-        userMsg.innerHTML = `<span class="inline-block max-w-xs">
-          <img src="${imageUrl}" class="rounded-lg shadow-lg border-2 border-cyan-400"/>
-        </span>`;
-        chatBox.appendChild(userMsg);
-
-        addToHistory("[Image Uploaded]");
-
-        // Bot typing
-        let botMsg = document.createElement("div");
-        botMsg.classList.add("mb-4", "text-left");
-        botMsg.innerHTML = `<span class="bg-black text-green-400 px-4 py-2 rounded-lg inline-block max-w-xl">Analyzing image...</span>`;
-        chatBox.appendChild(botMsg);
-        chatBox.scrollTop = chatBox.scrollHeight;
-
-        try {
-          let response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                contents: [{ parts: [{ text: "Describe this image" }, { inline_data: { mime_type: file.type, data: imageUrl.split(",")[1] } }] }]
-              })
-            }
-          );
-
-          let data = await response.json();
-          if (data.candidates && data.candidates.length > 0) {
-            let rawText = data.candidates[0].content.parts[0].text;
-            let html = marked.parse(rawText);
-
-            botMsg.innerHTML = `<div class="bg-gray-200 dark:bg-black text-black dark:text-green-400 px-4 py-2 rounded-lg inline-block max-w-xl prose dark:prose-invert">
-              <strong>Daffodils.ai:</strong><br>${html}
-            </div>`;
-          } else {
-            botMsg.innerHTML = `<span class="bg-black text-red-400 px-4 py-2 rounded-lg inline-block max-w-xl">Sorry, I couldn't analyze the image.</span>`;
-          }
-        } catch (error) {
-          botMsg.innerHTML = `<span class="bg-black text-red-400 px-4 py-2 rounded-lg inline-block max-w-xl">Error: Something went wrong.</span>`;
-        }
-
-        chatBox.scrollTop = chatBox.scrollHeight;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    // --- Send Text Message ---
+    // Send Text Message
     async function sendMessage() {
       let input = document.getElementById("user-input").value.trim();
       if (input === "") return;
